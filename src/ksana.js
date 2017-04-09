@@ -6,9 +6,12 @@ function on(emitter,name) {
     after: after,
     trigger: trigger,
     cancelOn: cancelOn,
+    stop: stop,
     _internal: {
       handler: null,
-      onTime: null
+      onTime: null,
+      timer: null,
+      onCancalled: null
     }
   }
   observable.emitter.on(name,(payload)=>{
@@ -17,6 +20,15 @@ function on(emitter,name) {
     }
   })
   return observable
+}
+
+function stop() {
+  if(this.emitter) {
+    this.emitter.removeAllListeners()
+  }
+  if(this._internal.timer) {
+    clearTimeout(this._internal.timer)
+  }
 }
 
 function after(time) {
@@ -38,7 +50,15 @@ function trigger(eventName) {
 }
 
 function cancelOn(eventName) {
-
+  this.emitter.on(eventName,()=>{
+    if(this._internal.timer) {
+      clearTimeout(this._internal.timer)
+      if(this._internal.onCancalled) {
+        this._internal.onCancalled()
+      }
+    }
+  })
+  return this
 }
 
 module.exports = {
