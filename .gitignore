@@ -1,0 +1,14 @@
+/node_modules
+/coverage
+/target
+/pkg
+*.log
+*.tar
+*.un~
+*.swp
+tags
+target
+/.idea
+
+commit.txt
+.npmrc
