@@ -3,13 +3,15 @@
 function on(emitter,name) {
   let observable = {
     emitter: emitter,
-    after: after,
+    afterTime: afterTime,
+    afterNTimes: afterNTimes,
     trigger: trigger,
     cancelOn: cancelOn,
     stop: stop,
+
     _internal: {
       handler: null,
-      onTime: null,
+      onTriggered: null,
       timer: null,
       onCancalled: null
     }
@@ -31,11 +33,11 @@ function stop() {
   }
 }
 
-function after(time) {
+function afterTime(time) {
   this._internal.handler = (payload)=>{
     this._internal.timer = setTimeout(()=>{
-      if(this._internal.onTime) {
-        this._internal.onTime(payload)
+      if(this._internal.onTriggered) {
+        this._internal.onTriggered(payload)
       }
     },time)
   }
@@ -43,8 +45,22 @@ function after(time) {
 }
 
 function trigger(eventName) {
-  this._internal.onTime = (payload)=>{
+  this._internal.onTriggered = (payload)=>{
     this.emitter.emit(eventName,payload)
+  }
+  return this
+}
+
+function afterNTimes(n) {
+  let counter = 0
+  this._internal.handler = (payload) =>{
+    counter = counter + 1
+    if(counter == n) {
+      counter = 0
+      if(this._internal.onTriggered) {
+        this._internal.onTriggered(payload)
+      }
+    }
   }
   return this
 }

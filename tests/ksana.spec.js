@@ -30,9 +30,8 @@ describe('Using kSaNa',()=>{
         let k
         before(()=>{
           k = ksana.on(emitter,onEvent)
-          .after(afterTime)
+          .afterTime(afterTime)
           .trigger(triggerEvent)
-          .cancelOn(cancelEvent)
         })
         after(()=>{
           k.stop()
@@ -52,7 +51,7 @@ describe('Using kSaNa',()=>{
         let k
         before(()=>{
           k = ksana.on(emitter,onEvent)
-          .after(afterTime)
+          .afterTime(afterTime)
           .trigger(triggerEvent)
           .cancelOn(cancelEvent)
         })
@@ -76,6 +75,90 @@ describe('Using kSaNa',()=>{
         })
       })
 
+    })
+
+    describe('Counting instances of the event',()=>{
+      const emitter = new eventEmitter();
+      let onEvent = 'on-event'
+      let triggerEvent = 'another-event'
+
+      describe('After "x" instances of the event',()=>{
+        let k
+        let n = 10
+        before(()=>{
+          k = ksana.on(emitter,onEvent)
+          .afterNTimes(n)
+          .trigger(triggerEvent)
+        })
+        after(()=>{
+          k.stop()
+        })
+        it('Should trigger another event',(done)=>{
+          let payload = "hello"
+          emitter.on(triggerEvent,(p)=>{
+            expect(p).to.deep.equal(payload)
+            return done()
+          })
+          for(i=0;i<n;i++) {
+            emitter.emit(onEvent,payload)
+          }
+        })
+      })
+
+      describe('Every "x" instances of the event',()=>{
+        let k
+        let n = 10
+        let cycles = 2
+        before(()=>{
+          k = ksana.on(emitter,onEvent)
+          .afterNTimes(n)
+          .trigger(triggerEvent)
+        })
+        after(()=>{
+          k.stop()
+        })
+        it('Should trigger another event',(done)=>{
+          let payload = "hello"
+          let called = 0
+          emitter.on(triggerEvent,(p)=>{
+            expect(p).to.deep.equal(payload)
+            called = called + 1
+            if(called == cycles) {
+              return done()
+            }
+          })
+          for(i=0;i<n*cycles;i++) {
+            emitter.emit(onEvent,payload)
+          }
+        })
+      })
+
+      describe('After "x" instances and a few more of the event',()=>{
+        let k
+        let n = 10
+        let few = n/2
+        before(()=>{
+          k = ksana.on(emitter,onEvent)
+          .afterNTimes(n)
+          .trigger(triggerEvent)
+        })
+        after(()=>{
+          k.stop()
+        })
+        it('Should still trigger another event only once',(done)=>{
+          let payload = "hello"
+          let called = 0
+          emitter.on(triggerEvent,(p)=>{
+            expect(p).to.deep.equal(payload)
+            called = called + 1
+          })
+          for(i=0;i<n+few;i++) {
+            emitter.emit(onEvent,payload)
+          }
+          expect(called).to.be.equal(1)
+          return done()
+        })
+      })
     })
   })
 })
