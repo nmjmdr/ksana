@@ -1,36 +1,44 @@
 
 
 function on(emitter,name) {
-  return {
-    event: {
-      emitter: emitter,
-      name: name
-    },
+  let observable = {
+    emitter: emitter,
     after: after,
-    cancelOn: cancelOn
+    trigger: trigger,
+    cancelOn: cancelOn,
+    _internal: {
+      handler: null,
+      onTime: null
+    }
   }
+  observable.emitter.on(name,(payload)=>{
+    if(observable._internal.handler) {
+      observable._internal.handler(payload)
+    }
+  })
+  return observable
 }
 
 function after(time) {
-  let observable = this
-  return {
-    time: time,
-    observable : observable,
-    trigger: trigger
+  this._internal.handler = (payload)=>{
+    this._internal.timer = setTimeout(()=>{
+      if(this._internal.onTime) {
+        this._internal.onTime(payload)
+      }
+    },time)
   }
+  return this
 }
 
 function trigger(eventName) {
-  this.observable.timer = setTimeout(()=>{
-    this.observable.event.emitter.emit(eventName)
-  },this.observable.time)
-  return this.observable
+  this._internal.onTime = (payload)=>{
+    this.emitter.emit(eventName,payload)
+  }
+  return this
 }
 
 function cancelOn(eventName) {
-  this.event.emitter.on(eventName,()=>{
-    this.timer.clearTimeout()
-  })
+
 }
 
 module.exports = {
