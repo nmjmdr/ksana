@@ -161,22 +161,4 @@ describe('Using kSaNa',()=>{
     })
   })
 
-  describe('Within a time interval',()=>{
-    describe('"x" number of events are generated',()=>{
-      let k
-      before(()=>{
-        k = ksana.on(emitter,onEvent)
-        .slidingWindow(5)
-        .count()
-        .exceeds(10)
-        .trigger(triggerEvent)
-      })
-      after(()=>{
-        k.stop()
-      })
-      it('Should then generate trigger event',()=>{
-
-      })
-    })
-  })
 })
